@@ -1,0 +1,135 @@
+                       
+          	      [ API Description for Libdns 0.1-alpha ]
+
+		      ***  NOTE: A man page is on the way  ***
+		      
+--[ 1. Library Overview (a.k.a. A poor excuse for documentation :)
+
+  (see the dnsq tool in the dsnq directory for an example of
+   Libdns at work)
+
+  The majority of Libdns routines utilise the dnsq_t data structure.
+The current format of this data structure is given below:
+
+    /* Query construction structure. */
+    struct dns_query {
+        struct dns_header   header;
+        struct dns_question *questions;    /* List of questions */
+        struct dns_rr       *answers;      /* List of answers */
+        struct dns_rr       *authority;    /* List of authority replies */
+        struct dns_rr       *additional;   /* List of additional replies */
+        int dns_errno;		       /* Local copy of last errno */
+        char *dns_data;		       /* The reply data */
+    };
+    typedef struct dns_query dnsq_t;
+
+  Programmers should not directly access these fields. Macros are provided
+to access the content of a dnsq_t item. The header field from above describes
+the standard DNS header. The dns_header structure is defined in dns.h but
+as with dnsq_t, it is recommended that programmers do not access it.
+
+  To begin making use of Libdns' functionality one must first obtain a
+dnsq_t item. This is done using the dns_new_query() function.
+
+     dnsq_t * dns_new_query(uint16_t id, int opcode, int recursive)
+     
+  Libdns sets the majority of header fields in the request packet for you.
+However, a programmer must provide their own 16-bit ID value and one of
+the DNS opcodes as defined in dns.h (DNS_OP_*). The recursive parameter
+flags whether the DNS server should attempt to recursively resolve our
+request. Zero means no, non-zero means yes. dns_new_query() will return
+NULL on failure (which can only be cause by memory allocation failure).
+
+  Once a dnsq_t item has been created, you can start adding questions to
+it. Although DNS doesn't say you can't have more than one query per request
+packet, it is recommended that you do only have one. The function used to
+add queries to a request is:
+
+    int dns_add_question(dnsq_t *q, char *host, uint16_t type,
+    			 uint16_t class)
+			 
+  q is a previously obtained dnsq_t item. host would be better named something
+like query as it is the text that will be used as the query body. This is
+usually a hostname like www.foobar.com. Note that the host string will
+automatically be converted from the 'www.foobar.com' form to the required
+<token length><token>... format that DNS uses. One current shortcoming is that
+pointer query formulation is not yet implemented. However, when it is, it will
+most likely take the form of a routine to turn an IP address into a string
+suitable to pass into dns_add_question() and not take place within
+dns_add_question() itself. type is the query type to perform (see dns.h,
+DNS_QT_*) and class is the DNS class to perform the query in (usually
+DNS_CLASS_INET). If dns_add_question() fails for any reason, it returns
+a Libdns error code (see dns.h, DNS_ERR_*). Libdns provides a convenience
+function to turn an error code into a descriptive string.
+
+  At this point it is worth mentioning that there are 2 potential sources for
+error in Libdns:  the DNS transaction itself, and a system related error
+(network down or mem. alloc failure etc.). In the event of a system error,
+Libdns uses the DNS_ERR_SEE_ERRNO error code and saves a copy of the current
+errno value in the dnsq_t structure. dns_strerror() (the function that
+converts an error code to a descriptive string) will automatically call
+strerror() on the saved errno value if the given error code is
+DNS_ERR_SEE_ERRNO.
+
+  After queries have been added to a dnsq_t structure, that structure can
+be passed into the dns_send_query() function, along with a socket to send
+on and a sockaddr_in structure specifying the address of the server to send
+to. The prototype for dns_send_query() is as follows:
+
+   int dns_send_query(dnsq_t *q, int s, struct sockaddr_in *addr,
+       		      int timeout)
+
+  Most of these parameters should be self-explanatory. I will mention that
+the timeout value is measured in seconds and currently there is no retry
+implemented in Libdns so once the timeout has expired, dns_send_query() will
+respond with and error code immediately. If all is well, dns_send_query()
+returns 0 and returns a Libdns error code on error.
+
+  * * * * *
+  * IMPORTANT NOTE:
+  *   The current version of Libdns only supports UDP for transport.
+      TCP support *may* be added  in the future.  This implies  that
+      zone transfers are not  possible using Libdns (due to DNS max.
+      UDP packet size  of 512) and  any  attempt to  perform a  zone  *
+      transfer request will result in an error.                       *
+                                                              * * * * *
+							      
+  dns_send_query() returns after it receives and parses a reply from the
+server, or if an error occurs. If no error occurs, the dnsq_t item will
+contain lists of resource records that have been mostly pre-parsed into
+a dns_rr structure as given below:
+
+    /* Resource Record structure */
+    struct dns_rr {
+        char *     rr_name;	       /* Domain name */
+        uint16_t   rr_type; 	       /* RR type */
+        uint16_t   rr_class;	       /* RR class */
+        uint32_t   rr_ttl;  	       /* RR Time-to-live */
+        uint16_t   rr_datalen;	       /* RR Data length */
+        char *     rr_data;	       /* RR Data */
+        struct dns_rr *next;	       /* Next RR in the list */
+    };
+    
+  Again, programmers should use the provided access macros to access items
+in this structure (all macros will be described later). The only element
+that is safe to access directly is 'next' for purposes of list traversal.
+The first 5 fields are exactly the same as given in the DNS specification
+(see RFCs 1034 & 1035). rr_data deserves some special mention. rr_data
+points to the beginning of *THIS RR's DATA PORTION* and is RR type specific!
+Note that the dnsq_t structure actually carries a copy of the entire reply
+received from the server (this is neccessary for rebuilding strings in
+RR data sections that have been compressed with the DNS compression scheme
+(again, see the RFCs)).
+
+  When done with a dnsq_t structure, it is important to free the resources
+it is dragging around with it (for a reply with lot's of RRs, this can be
+quite a bit). dns_free_query() takes a pointer to a dnsq_t structure and
+free's all RR structures and lets go of the copy of the data that was
+received from the server.
+
+  I know that's been a pretty poor excuse for documentation but understand
+that as I write this:
+   1) very early in the morning,
+   2) the library is in alpha state, and
+   3) the header file and source files (so far there's only just > 1000
+      lines) are quite well documented.     

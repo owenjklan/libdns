@@ -1,0 +1,25 @@
+CC=gcc
+CFLAGS=-Wall -O2 -g -ggdb
+OBJS= dns.o dns_udp.o dns_str.o
+LOBJS= dns.lo dns_udp.lo dns_str.lo
+RELEASE= 0.1
+INSTALLDIR= /usr/local/lib
+
+.c.o:
+	libtool --mode=compile $(CC) -c $< -o $@ $(CFLAGS)
+
+all: $(OBJS) $(LOBJS) dns.h
+	libtool --mode=link $(CC) $(LOBJS) $(CFLAGS) -o libdns.la \
+	        -rpath $(INSTALLDIR) -release $(RELEASE)
+		
+clean:
+#       	libtool --mode=clean /bin/rm
+	rm -f *.la
+	rm -f *.lo
+	rm -rf ./.libs
+	rm -f *.o
+	rm -f ./*~
+
+install: all
+	libtool --mode=install install -c libdns.la $(INSTALLDIR)/libdns.la
+	libtool --mode=finish $(INSTALLDIR)

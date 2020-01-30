@@ -1,0 +1,37 @@
+
+  Update History  -  DNS Library
+  ------------------------------
+
+6th September, 2003 - Implemented timeouts for dns_send_query() using
+    	       	      select(). Note that the actual call to select() is
+		      made in dns_get_response_udp().
+		    - Did a test build on Mac OS X, 10.3 and aside from
+		      differing linker flags to make shared objects, things
+		      went without a hitch. This also prompted the use of
+		      <stdint.h> to declare the 'uint32_t' etc. data types.
+
+2nd September, 2003 - Fixed recursion problem with dns_brs_helper(). Turns
+    	       	      out I was only using the bottom byte of a compression
+		      word as the offset instead of the LS 14 bits. Duh!
+
+31st August, 2003   - Replaced occurances of 'unsigned short', 'unsigned int'
+     	     	      and 'unsigned long' with portable types, 'uint16_t'
+		      and 'uint32_t'. Note that some int's were left as they
+		      are. This happens where the integer's size and sign
+		      isn't important (eg. flag values).
+		    - Modified Makefile to create static library and install
+		      libraries with versioned symbolic links.
+
+30th August, 2003   - *Partially* fixed dns_build_reply_string(). At least
+      	     	      implemented a recursive method that seems to handle
+		      most compressed strings fine. Some strings still give
+		      it problems though. At least now the routine uses
+		      recursion.
+
+27th August, 2003   - Extended reply handling to actually parse what
+(only just the 27th)  is returned and add it to relevant lists (well, only
+		      answers are implemented so far).
+		    - Added utility symbol-to-string conversion routines
+		      for types, classes and error codes.
+27th August, 2003   - Implemented dns_build_rr() to remove redundancy in
+(almost the 28th...)  dns_parse_response().

@@ -1,0 +1,64 @@
+.TH libdns 3 "2nd September 2003" "libdns 0.1-alpha" "Application Programmer\'s Manual"
+.SH \fBNAME\fP
+libdns - DNS query construction, sending and reply parsing library
+\
+.SH \fBIMPORTANT\fP
+This manpage documents the first implementation of \fBlibdns\fP in it's
+alpha state. As such, the data structures and interfaces described within
+are subject to change. However this manpage will be kept current for each
+release of the source.
+\
+.SH \fBSYNOPSIS\fP
+#include <libdns/dns.h>
+
+Link with -ldns.
+\
+.SH \fBDESCRIPTION\fP
+\
+\fBLibdns\fP provides a simple interface to creating DNS queries
+and parsing the results. DNS replies are automatically parsed into lists
+of resource records and any standard string elements are reconstructed,
+taking into account the DNS string compression scheme. This greatly
+simplifies the creation of DNS applications by removing all the
+fiddly protocol work from the programmer's responsibilies. Note that
+currently only UDP is supported as a transmission protocol and as such,
+DNS zone transfers are not implemented. Any attempt to request a zone
+transfer will result in an error.
+
+\fBLibdns\fP uses the \fBdnsq_t\fP structure to hide the underlying format
+of DNS packets. Questions are added to a \fBdnsq_t\fP structure and then
+sent off to a server. Replies are parsed into lists of \fBdns_rr\fP structures
+that represent DNS resource record (RR) structures.
+\
+.SH \fBFUNCTION PROTOTYPES\fP
+.SS \fBGeneral Library Functions\fP
+\fBdnsq_t *\fPdns_new_query(\fBuint16_t\fP id, \fBint\fP opcode, \fBint\fP recursive)
+
+\fBvoid\fP dns_free_query(\fBdnsq_t *\fP q)
+
+\fBint\fP dns_add_question(\fBdnsq_t *\fP q, \fBchar *\fPhost, \fBuint16_t\fP type,
+				  \fBuint16_t\fP class)
+
+\fBint\fP dns_send_query(\fBdnsq_t *\fP q, \fBint\fP s, \fBstruct sockaddr_in *\fP addr)
+
+\fBuint16_t\fP dns_get_lib_version()
+
+\fBchar *\fP dns_get_lib_version_str()
+
+\fB#define\fP LIBDNS_VERSION    "0.1-alpha"
+
+\fB#define\fP LIBDNS_MAJOR      0
+
+\fB#define\fP LIBDNS_MINOR	1
+\
+.SS \fBString Utility Functions\fP
+\fBchar *\fP dns_convert_name(\fBchar *\fP name, \fBint *\fP error)
+
+\fBchar *\fP dns_type_to_str(\fBuint16_t\fP type)
+
+\fBchar *\fP dns_class_to_str(\fBuint16_t\fP class)
+
+\fBchar *\fP dns_strerror(\fBdnsq_t *\fP q, \fBint\fP code)
+
+\fBchar *\fP dns_build_reply_string(\fBchar *\fP data, \fBint\fP len, \fBchar *\fP start,
+				          \fBint *\fP dist)
