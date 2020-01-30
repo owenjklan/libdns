@@ -180,7 +180,7 @@ int dns_send_query(dnsq_t *q, int s, struct sockaddr_in *addr, int timeout)
       return retval;
 
     retval = dns_parse_response(q, response_data, data_size);
-    
+    free(response_data);
     return retval;
 }
 

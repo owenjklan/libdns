@@ -1,6 +1,7 @@
 #CC=mipsel-linux-gnu-gcc
 CC=gcc
-CFLAGS=-Wall -O2 -fPIC -static
+# Using -O0 at valgrind's suggestion while hunting memory leaks
+CFLAGS=-Wall -O0 -fPIC -static
 OBJS= dns.o dns_str.o dns_tcp.o dns_udp.o
 RELEASE= 0.1
 

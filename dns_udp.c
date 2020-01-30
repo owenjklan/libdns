@@ -33,6 +33,7 @@ int dns_get_response_udp(dnsq_t *q, int s, struct sockaddr_in *addr,
     while (loop) {
         /* Setup the time structure for select() */
         t.tv_sec = timeout;
+        t.tv_usec = 0;
         FD_ZERO(&rfd_set);
         FD_SET(s, &rfd_set);
         

@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -O2 -g -ggdb
+CFLAGS=-Wall -O0 -g -ggdb
 LDFLAGS= -L. -ldns
 OBJS=dnsq.o
 
@@ -16,3 +16,6 @@ clean:
 
 install: all
 	cp dnsq /usr/local/bin
+
+valgrind:
+	valgrind --track-origins=yes --leak-check=full ./dnsq 8.8.8.8 dns.google
