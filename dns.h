@@ -30,8 +30,8 @@
  */
 /* Structure that forms the common header of the DNS query. */
 struct dns_header {
-    uint16_t dns_id;	       /* Identifier */
-    uint16_t dns_flags;	       /* Flags word */
+    uint16_t dns_id;         /* Identifier */
+    uint16_t dns_flags;        /* Flags word */
     uint16_t dns_num_quest;    /* # of questions */
     uint16_t dns_num_ans;      /* # of answer RRs */
     uint16_t dns_num_auth;     /* # of authority RRs */
@@ -44,21 +44,21 @@ struct dns_header {
  */
 /* Question structure */
 struct dns_question {
-    char *       q_content;	       /* Question content */
-    uint16_t     q_type;	       /* Question type */
-    uint16_t     q_class;	       /* Question class */
-    struct dns_question *next;	       /* Next question pointer */
+    char *       q_content;        /* Question content */
+    uint16_t     q_type;         /* Question type */
+    uint16_t     q_class;        /* Question class */
+    struct dns_question *next;         /* Next question pointer */
 };
 
 /* Resource Record structure */
 struct dns_rr {
-    char *     rr_name;		       /* Domain name */
-    uint16_t   rr_type; 	       /* RR type */
-    uint16_t   rr_class;	       /* RR class */
-    uint32_t   rr_ttl;  	       /* RR Time-to-live */
-    uint16_t   rr_datalen;	       /* RR Data length */
-    char *     rr_data;		       /* RR Data */
-    struct dns_rr *next;	       /* Next RR in the list */
+    char *     rr_name;          /* Domain name */
+    uint16_t   rr_type;          /* RR type */
+    uint16_t   rr_class;         /* RR class */
+    uint32_t   rr_ttl;           /* RR Time-to-live */
+    uint16_t   rr_datalen;         /* RR Data length */
+    char *     rr_data;          /* RR Data */
+    struct dns_rr *next;         /* Next RR in the list */
 };
 
 /* Query construction structure. */
@@ -68,8 +68,8 @@ struct dns_query {
     struct dns_rr       *answers;      /* List of answers */
     struct dns_rr       *authority;    /* List of authority replies */
     struct dns_rr       *additional;   /* List of additional replies */
-    int dns_errno;		       /* Local copy of last errno */
-    char *dns_data;		       /* The reply data */
+    int dns_errno;           /* Local copy of last errno */
+    char *dns_data;          /* The reply data */
 };
 typedef struct dns_query dnsq_t;
 
@@ -83,21 +83,21 @@ typedef struct dns_query dnsq_t;
 #define DNS_OP_SERVSTAT       0x02     /* Server status */
 
 /* DNS Query reply codes */
-#define DNS_R_NO_ERROR        0	       /* No error */
-#define DNS_R_FORMAT_ERROR    1	       /* Format error with query */
-#define DNS_R_SERVER_FAILURE  2	       /* Server failure */
-#define DNS_R_NAME_ERROR      3	       /* Name error */
-#define DNS_R_NOT_IMPLEMENTED 4	       /* Query type not supported */
-#define DNS_R_REFUSED         5	       /* Server refused to handle query */
+#define DNS_R_NO_ERROR        0        /* No error */
+#define DNS_R_FORMAT_ERROR    1        /* Format error with query */
+#define DNS_R_SERVER_FAILURE  2        /* Server failure */
+#define DNS_R_NAME_ERROR      3        /* Name error */
+#define DNS_R_NOT_IMPLEMENTED 4        /* Query type not supported */
+#define DNS_R_REFUSED         5        /* Server refused to handle query */
 
 /* Bits for 'recursive' option for dns_new_query() */
-#define DNS_DO_RECURSE	      1        /* Enable recursion */
-#define DNS_DONT_RECURSE      0	       /* Disable recursion */
+#define DNS_DO_RECURSE        1        /* Enable recursion */
+#define DNS_DONT_RECURSE      0        /* Disable recursion */
 
 /* DNS Query types */
-#define DNS_QT_A              1	       /* IPv4 Address record */
-#define DNS_QT_NS             2	       /* Name server */
-#define DNS_QT_CNAME          5	       /* Canonical name (IP-hostname) */
+#define DNS_QT_A              1        /* IPv4 Address record */
+#define DNS_QT_NS             2        /* Name server */
+#define DNS_QT_CNAME          5        /* Canonical name (IP-hostname) */
 #define DNS_QT_SOA            6        /* Start of zone-of-authority */
 #define DNS_QT_WKS            11       /* Well Known Service description */
 #define DNS_QT_PTR            12       /* Pointer record */
@@ -117,8 +117,8 @@ typedef struct dns_query dnsq_t;
 #define DNS_QT_ANY            255      /* All records */
 
 /* DNS Query classes */
-#define DNS_CLASS_INET        1	       /* Inet address */
-#define DNS_CLASS_CHAOS       3	       /* Chaos system */
+#define DNS_CLASS_INET        1        /* Inet address */
+#define DNS_CLASS_CHAOS       3        /* Chaos system */
 
 /* Accessor routines declared as macros to get at elements of the dnsq_t
  * structure */
@@ -166,9 +166,9 @@ typedef struct dns_query dnsq_t;
 #define DNS_ERR_SEE_ERRNO               3  /* Look at value of errno */
 #define DNS_ERR_NULL_PARAM              4  /* A NULL parameter was given */
 #define DNS_ERR_INVALID_QUERY           5  /* The given dnsq_t is invalid */
-#define DNS_ERR_PARAM_ERROR		6  /* Function given invalid param */
+#define DNS_ERR_PARAM_ERROR   6  /* Function given invalid param */
 #define DNS_ERR_QUERY_TOO_LONG          7  /* The whole query is too big
-					    * (> 512 for UDP) */
+              * (> 512 for UDP) */
 #define DNS_ERR_REPLY_TRUNCATED         8  /* The response was truncated */
 #define DNS_ERR_NO_SUCH_NAME            9  /* requested name doesn't exist */
 #define DNS_ERR_QUERY_REFUSED          10  /* Server refused to handle query */
@@ -182,9 +182,9 @@ typedef struct dns_query dnsq_t;
 extern dnsq_t *dns_new_query(uint16_t id, int opcode, int recursive);
 extern void dns_free_query(dnsq_t *q);
 extern int dns_add_question(dnsq_t *q, char *host, uint16_t type,
-			    uint16_t class);
+          uint16_t class);
 extern int dns_send_query(dnsq_t *q, int s, struct sockaddr_in *addr,
-			  int timeout);
+        int timeout);
 
 /* From dns_str.c */
 extern char *dns_convert_name(char *name, int *error);
@@ -192,23 +192,23 @@ extern char *dns_type_to_str(uint16_t type);
 extern char *dns_class_to_str(uint16_t class);
 extern char *dns_strerror(dnsq_t *q, int code);
 extern char *dns_build_reply_string(char *data, int len,
-				    char *start, int *dist);
+            char *start, int *dist);
 
 /* Some helper macros, these are mostly for the library code, but could
  * be utilised by user apps. as well */
 /* Macro that free's a pointer if it's non-NULL */
 #define FREE_IF_VALID(p)     \
      { if (p)                \
-	  free(p); }
+    free(p); }
 
 /* Macro that is used by functions that return an error in a user
  * provided integer location. */
 #define SET_ERROR(e)          \
     { if (error)              \
-	*error = e; }
+  *error = e; }
 
 /* Macro to convert an unsigned short to network byte order, then
  * assign back into the variable */
 #define FIX_FOR_NBO(s)    s = htons(s)
 
-#endif				       /* __DNS_H_ */
+#endif               /* __DNS_H_ */
